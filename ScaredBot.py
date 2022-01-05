@@ -112,6 +112,8 @@ def getText(data):
     
     if text != "":
         interText = " of "
+    elif len(text) == 1:
+        interText = " of the letter "
     
     tweet = scared + interText + text + ".."
     print("===========================================")
@@ -159,7 +161,7 @@ def main():
     print("*******************")
 
 main()
-schedule.every(1).minutes.do(main)
+schedule.every(30).minutes.do(main)
     
 while True:
     schedule.run_pending()
