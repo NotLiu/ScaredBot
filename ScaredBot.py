@@ -40,6 +40,7 @@ def scaredSearch():
     return response
     
 def getText(data):
+    global storage
     scared = "I'm scared"
     interText = ".."
     text = ""
@@ -75,15 +76,17 @@ def getText(data):
                     word = ""
             else:
                 word = removePunc[0]
-            
+            print(word)
+            print(storage.get(word))
+            print("---")
             if(len(word.split(" "))>10): #if the phrase is longer than 10 words, move on
                 word = ""
             if storage.get(word, None) == None:
                 if leastTweeted == 0 and text == "": #replace tweeted word if its first scanned and no record of it
                     text = word
-                elif leastTweeted > 0: #replace tweeted word if is the first scanned word that is new
+                elif leastTweeted > 0 and storage.get(text,1)>leastTweeted: #replace tweeted word if is the first scanned word that is new
                     text = word
-            elif storage.get(word, None) < leastTweeted: #replace tweeted word if searched word is used less than others scanned in batch
+            elif int(storage.get(word, None)) < leastTweeted: #replace tweeted word if searched word is used less than others scanned in batch
                 text = word
                 leastTweeted = storage.get(word)
         else:
@@ -98,7 +101,7 @@ def getText(data):
             if storage.get(word, None) == None:
                 if leastTweeted == 0 and text == "": #replace tweeted word if its first scanned and no record of it
                     text = word
-                elif leastTweeted > 0: #replace tweeted word if is the first scanned word that is new
+                elif leastTweeted > 0 and storage.get(word, None)<leastTweeted: #replace tweeted word if is the first scanned word that is new
                     text = word
             elif storage.get(word, None) < leastTweeted: #replace tweeted word if searched word is used less than others scanned in batch
                 text = word
@@ -120,6 +123,7 @@ def getText(data):
     return tweet
     
 def readStorage():
+    global storage
     file = open("storage.json", "r")
     storage = json.load(file)
     print("STORAGE READ")
@@ -129,11 +133,13 @@ def readStorage():
     file.close()
     
 def writeStorage():
+    global storage
     file = open("storage.json", "w")
     json.dump(storage,file)
     file.close()
     
 def store(item):
+    global storage
     if(storage.get(item,None)==None):
         storage[item] = 1
     else:
@@ -153,7 +159,7 @@ def main():
     print("*******************")
 
 main()
-schedule.every().hour.do(main)
+schedule.every(1).minutes.do(main)
     
 while True:
     schedule.run_pending()
