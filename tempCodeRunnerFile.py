@@ -1,4 +1,2 @@
-if(removePunc[count][-1] in nouns):
-                    word += removePunc[count][:-1]
-                    break
-                word += removePunc[count]+" "
+"))>10): #if the phrase is longer than 10 words, move on
+            #     word = ""

@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 
 #all nouns from nltk.corpus
 nouns = {x.name().split('.', 1)[0] for x in wn.all_synsets('n')}
+verbs = {x.name().split('.', 1)[0] for x in wn.all_synsets('v')}
 storage = dict()
 
 load_dotenv()
@@ -46,24 +47,29 @@ def getText(data):
     text = ""
     
     #excludedWords: words that dont make sense alone
-    excludedWords = ["my", "the"]
+    excludedWords = ["my", "the", "is", "i", "I"]
     #forbiddenWords: words to skip over
-    forbiddenWords = ["lol", "LOL", "lmao", "LMAO", "wtf", "omg"]
+    forbiddenWords = ["lol", "LOL", "lmao", "LMAO", "wtf", "omg", "is"]
     
     #scrub data
     tweets = data[0]
     
     leastTweeted = 0
     for i in tweets:
-        print(i.id)
         if(i.text.find("im scared of")!= -1):
-            r = re.compile(r'[\s{}]+'.format(re.escape(string.punctuation)))
-            removePunc = r.split(i.text[i.text.find("im scared of")+13:])
+            removePunc = re.split('[,.?!\s]',i.text[i.text.find("im scared of")+13:])
+            
+            try:
+                while True:
+                    removePunc.remove('')
+            except ValueError:
+                pass
             
             word = ""
             count = 0
+            print(removePunc)
             if len(removePunc)>1:
-                while(count<len(removePunc)-1 and ((removePunc[count] not in nouns and removePunc[count] not in excludedWords) or (count+1<len(removePunc) and removePunc[count+1] in nouns))):
+                while(count<len(removePunc) and (removePunc[count] not in nouns and removePunc[count] not in excludedWords)):
                     if(removePunc[count][-1]=="s" and removePunc[count][:-1] not in excludedWords and removePunc[count][:-1] in nouns): #check if nonplural form is recognized
                         word += removePunc[count]
                         break
@@ -73,11 +79,18 @@ def getText(data):
                         continue
                     count+=1 #count up here in case it hits a forbidden word
                 else:
-                    word += removePunc[count]
-                if(removePunc[-1] not in words.words() and (len(removePunc)>1 and removePunc[-2] not in words.words())): #if last word is not a word, omit
+                    while((count < len(removePunc) and removePunc[count] in nouns) or (len(word)>1 and len(word.split(" ")[-2]) == 1)):#test ruleset, in case of phrases like "i'm scared of losing someone I love"
+                        if(count>=len(removePunc)):
+                            break
+                        word += removePunc[count] + " "
+                        count+=1
+                        if(count+1 <len(removePunc) and removePunc[count] == "being"):
+                            word += removePunc[count+1]
+                if("https" in word ): #if has link, omit
                     word = ""
             else:
                 word = removePunc[0]
+            print("tweet ID: ",i.id)
             print(word)
             print(storage.get(word))
             print("---")
@@ -155,6 +168,7 @@ def main():
     print("SEARCHING")
     print("===========================================")
     results = scaredSearch()
+    # getText(results) #dev
     
     createTweet(getText(results))
     print("RUN COMPLETED")
