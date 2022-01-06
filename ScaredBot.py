@@ -47,6 +47,7 @@ def getText(data):
     
     #excludedWords: words that dont make sense alone
     excludedWords = ["my", "the"]
+    #forbiddenWords: words to skip over
     forbiddenWords = ["lol", "LOL", "lmao", "LMAO", "wtf", "omg"]
     
     #scrub data
@@ -54,6 +55,7 @@ def getText(data):
     
     leastTweeted = 0
     for i in tweets:
+        print(i.id)
         if(i.text.find("im scared of")!= -1):
             r = re.compile(r'[\s{}]+'.format(re.escape(string.punctuation)))
             removePunc = r.split(i.text[i.text.find("im scared of")+13:])
@@ -61,8 +63,8 @@ def getText(data):
             word = ""
             count = 0
             if len(removePunc)>1:
-                while(count<len(removePunc)-1 and removePunc[count] not in nouns):
-                    if(removePunc[count][:len(removePunc[count])-1]=="s" and removePunc[count][:len(removePunc[count])-1] in nouns):
+                while(count<len(removePunc)-1 and ((removePunc[count] not in nouns and removePunc[count] not in excludedWords) or (count+1<len(removePunc) and removePunc[count+1] in nouns))):
+                    if(removePunc[count][-1]=="s" and removePunc[count][:-1] not in excludedWords and removePunc[count][:-1] in nouns): #check if nonplural form is recognized
                         word += removePunc[count]
                         break
                     elif removePunc[count] not in forbiddenWords:
@@ -112,7 +114,7 @@ def getText(data):
     
     if text != "":
         interText = " of "
-    elif len(text) == 1:
+    elif len(text).split() == 1:
         interText = " of the letter "
     
     tweet = scared + interText + text + ".."
