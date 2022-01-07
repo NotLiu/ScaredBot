@@ -49,16 +49,18 @@ def getText(data):
     #excludedWords: words that dont make sense alone
     excludedWords = ["my", "the", "is", "i", "I"]
     #forbiddenWords: words to skip over
-    forbiddenWords = ["lol", "LOL", "lmao", "LMAO", "wtf", "omg", "is"]
+    forbiddenWords = ["lol", "LOL", "lmao", "LMAO", "wtf", "omg", "is", "nigga","niggas"]
     
     #scrub data
     tweets = data[0]
     
     leastTweeted = 0
     for i in tweets:
+        print(i.text)
         if(i.text.find("im scared of")!= -1):
-            removePunc = re.split('[,.?!\s]',i.text[i.text.find("im scared of")+13:])
-            
+            removePunc = re.split('[.?!\s]',i.text[i.text.find("im scared of")+13:])
+            if len(removePunc) == 0: 
+                continue
             try:
                 while True:
                     removePunc.remove('')
@@ -84,6 +86,8 @@ def getText(data):
                             break
                         word += removePunc[count] + " "
                         count+=1
+                        if(count+1 <len(removePunc) and removePunc[count+1][-1]=="s" and removePunc[count+1][:-1] not in excludedWords and removePunc[count+1][:-1] in nouns): #check if nonplural form is recognized
+                            word += removePunc[count]
                         if(count+1 <len(removePunc) and removePunc[count] == "being"):
                             word += removePunc[count+1]
                 if("https" in word ): #if has link, omit
@@ -105,13 +109,47 @@ def getText(data):
                 text = word
                 leastTweeted = storage.get(word)
         else:
-            r = re.compile(r'[\s{}]+'.format(re.escape(string.punctuation)))
-            removePunc = r.split(i.text[i.text.find("im scared of")+13:])
-            
-            if (removePunc[0] in excludedWords):
-                word = removePunc[0]+" "+removePunc[1]
+            removePunc = re.split('[.?!\s]',i.text[i.text.find("im scared of")+13:])
+            if len(removePunc) == 0: 
+                continue
+            try:
+                while True:
+                    removePunc.remove('')
+            except ValueError:
+                pass
+                
+            count = 0
+            print(removePunc)
+            if len(removePunc)>1:
+                while(count<len(removePunc) and (removePunc[count] not in nouns and removePunc[count] not in excludedWords)):
+                    if(removePunc[count][-1]=="s" and removePunc[count][:-1] not in excludedWords and removePunc[count][:-1] in nouns): #check if nonplural form is recognized
+                        word += removePunc[count]
+                        break
+                    elif removePunc[count] not in forbiddenWords:
+                        word += removePunc[count]+" "
+                        count += 1
+                        continue
+                    count+=1 #count up here in case it hits a forbidden word
+                else:
+                    while((count < len(removePunc) and removePunc[count] in nouns) or (len(word)>1 and len(word.split(" ")[-2]) == 1)):#test ruleset, in case of phrases like "i'm scared of losing someone I love"
+                        if(count>=len(removePunc)):
+                            break
+                        word += removePunc[count] + " "
+                        count+=1
+                        if(count+1 <len(removePunc) and removePunc[count+1][-1]=="s" and removePunc[count+1][:-1] not in excludedWords and removePunc[count+1][:-1] in nouns): #check if nonplural form is recognized
+                            word += removePunc[count]
+                        if(count+1 <len(removePunc) and removePunc[count] == "being"):
+                            word += removePunc[count+1]
+                if("https" in word ): #if has link, omit
+                    word = ""
             else:
                 word = removePunc[0]
+            print("tweet ID: ",i.id)
+            print(word)
+            print(storage.get(word))
+            print("---")
+            if(len(word.split(" "))>10): #if the phrase is longer than 10 words, move on
+                word = ""
             
             if storage.get(word, None) == None:
                 if leastTweeted == 0 and text == "": #replace tweeted word if its first scanned and no record of it
