@@ -92,7 +92,7 @@ def getText(data):
                             word += removePunc[count+1]
                 if("https" in word ): #if has link, omit
                     word = ""
-            else:
+            elif len(removePunc)>0:
                 word = removePunc[0]
             print("tweet ID: ",i.id)
             print(word)
@@ -117,7 +117,8 @@ def getText(data):
                     removePunc.remove('')
             except ValueError:
                 pass
-                
+            
+            word=""
             count = 0
             print(removePunc)
             if len(removePunc)>1:
