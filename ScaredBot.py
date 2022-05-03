@@ -1,4 +1,5 @@
 import os
+import dotenv
 import tweepy
 import json
 import string
@@ -49,7 +50,7 @@ def getText(data):
     #excludedWords: words that dont make sense alone
     excludedWords = ["my", "the", "is", "i", "I"]
     #forbiddenWords: words to skip over
-    forbiddenWords = ["lol", "LOL", "lmao", "LMAO", "wtf", "omg", "is", "nigga","niggas"]
+    forbiddenWords = os.getenv("FORBIDDEN_WORDS")
     
     #scrub data
     tweets = data[0]
