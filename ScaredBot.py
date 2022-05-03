@@ -75,7 +75,7 @@ def getText(data):
                 if len(removePunc)>1:
                     while(count<len(removePunc) and (removePunc[count] not in nouns and removePunc[count] not in excludedWords)):
                         if(removePunc[count][-1]=="s" and removePunc[count][:-1] not in excludedWords and removePunc[count][:-1] in nouns): #check if nonplural form is recognized
-                            word += removePunc[count]
+                            word += removePunc[count]+" "
                             break
                         elif removePunc[count] not in forbiddenWords:
                             word += removePunc[count]+" "
@@ -89,7 +89,7 @@ def getText(data):
                             word += removePunc[count] + " "
                             count+=1
                             if(count+1 <len(removePunc) and removePunc[count+1][-1]=="s" and removePunc[count+1][:-1] not in excludedWords and removePunc[count+1][:-1] in nouns): #check if nonplural form is recognized
-                                word += removePunc[count]
+                                word += removePunc[count]+" "
                             if(count+1 <len(removePunc) and removePunc[count] == "being"):
                                 word += removePunc[count+1]
                     if("https" in word ): #if has link, omit
@@ -110,8 +110,8 @@ def getText(data):
                 elif int(storage.get(word, None)) < leastTweeted: #replace tweeted word if searched word is used less than others scanned in batch
                     text = word
                     leastTweeted = storage.get(word)
-            else:
-                removePunc = re.split('[.?!\s]',i.text[i.text.find("im scared of")+13:])
+            elif(i.text.find("IM SCARED OF")!= -1):
+                removePunc = re.split('[.?!\s]',i.text[i.text.find("IM SCARED OF")+13:])
                 if len(removePunc) == 0: 
                     continue
                 try:
@@ -126,10 +126,10 @@ def getText(data):
                 if len(removePunc)>1:
                     while(count<len(removePunc) and (removePunc[count] not in nouns and removePunc[count] not in excludedWords)):
                         if(removePunc[count][-1]=="s" and removePunc[count][:-1] not in excludedWords and removePunc[count][:-1] in nouns): #check if nonplural form is recognized
-                            word += removePunc[count]
+                            word += removePunc[count].lower() + " "
                             break
                         elif removePunc[count] not in forbiddenWords:
-                            word += removePunc[count]+" "
+                            word += removePunc[count].lower()+" "
                             count += 1
                             continue
                         count+=1 #count up here in case it hits a forbidden word
@@ -137,12 +137,12 @@ def getText(data):
                         while((count < len(removePunc) and removePunc[count] in nouns) or (len(word)>1 and len(word.split(" ")[-2]) == 1)):#test ruleset, in case of phrases like "i'm scared of losing someone I love"
                             if(count>=len(removePunc)):
                                 break
-                            word += removePunc[count] + " "
+                            word += removePunc[count].lower() + " "
                             count+=1
                             if(count+1 <len(removePunc) and removePunc[count+1][-1]=="s" and removePunc[count+1][:-1] not in excludedWords and removePunc[count+1][:-1] in nouns): #check if nonplural form is recognized
-                                word += removePunc[count]
+                                word += removePunc[count].lower()+" "
                             if(count+1 <len(removePunc) and removePunc[count] == "being"):
-                                word += removePunc[count+1]
+                                word += removePunc[count+1].lower()+" "
                     if("https" in word ): #if has link, omit
                         word = ""
                 else:
