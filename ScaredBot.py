@@ -169,7 +169,7 @@ def getText(data):
     
     if text != "":
         interText = " of "
-    elif len(text).split() == 1:
+    elif len(text.split()) == 1:
         interText = " of the letter "
     
     tweet = scared + interText + text + ".."
